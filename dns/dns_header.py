@@ -5,11 +5,12 @@ from dns.dns_helper import bytes_at
 
 class DNSHeader:
     def __init__(self,
-                 id: int,
-                 qr: bool, opcode: int, aa: bool, tc: bool, rd: bool, ra: bool,
-                 rcode: int, qd_count: int, an_count: int, ns_count: int,
-                 ar_count: int):
-        self.id = id
+                 identifier: int,
+                 qr: bool, opcode: int = 0, aa: bool = True, tc: bool = False,
+                 rd: bool = True, ra: bool = True,
+                 rcode: int = 0, qd_count: int = 0, an_count: int = 0,
+                 ns_count: int = 0, ar_count: int = 0):
+        self.identifier = identifier
         self.qr = qr
         self.opcode = opcode
         self.aa = aa
@@ -23,19 +24,21 @@ class DNSHeader:
         self.ar_count = ar_count
 
     def to_bytes(self):
-        qr_rcode = self.qr << 15 | (self.opcode & 0b1111) << 11 | \
-                   self.aa << 10 | self.tc << 9 | self.rd << 8 | self.ra << 7 | \
-                   (self.rcode & 0b1111)
+        qr_rcode = (self.qr << 15 | (self.opcode & 0b1111) << 11 |
+                    self.aa << 10 | self.tc << 9 | self.rd << 8 |
+                    self.ra << 7 | (self.rcode & 0b1111))
 
-        return struct.pack('!6h', id, qr_rcode,
+        print(qr_rcode)
+        return struct.pack('!hH4h', self.identifier, qr_rcode,
                            self.qd_count, self.an_count,
                            self.ns_count, self.ar_count)
+
 
 def parse_header(header_bytes):
     lines = struct.unpack('!6h', header_bytes)
 
     return DNSHeader(
-        id=lines[0],
+        identifier=lines[0],
 
         qr=bytes_at(lines[1], 15, 1),
         opcode=bytes_at(lines[1], 11, 4),

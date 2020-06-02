@@ -1,5 +1,5 @@
 import struct
-from typing import List
+from typing import List, Tuple
 
 from dns.dns_header import DNSHeader, parse_header
 from dns.dns_query import DNSQuery, parse_queries
@@ -10,12 +10,13 @@ class DNSPacket:
     def __init__(self, header: DNSHeader):
         self.header: DNSHeader = header
         self.queries: List[DNSQuery] = []
-        self.ans_records: List[DNSQuery] = []
-        self.auth_records: List[DNSQuery] = []
-        self.additional_records: List[DNSQuery] = []
+        self.ans_records: List[ResourceRecord] = []
+        self.auth_records: List[ResourceRecord] = []
+        self.additional_records: List[ResourceRecord] = []
 
-    def add_query(self, qname: str, qtype: int, qclass: int):
-        self.queries.append(DNSQuery(qname, qtype, qclass))
+    def add_query(self, query: DNSQuery):
+        self.queries.append(query)
+        return self
 
     def set_data(self, queries: List[DNSQuery], records: List[ResourceRecord]):
         self.queries = queries
@@ -47,3 +48,10 @@ def read_packet(packet_bytes: bytes) -> DNSPacket:
     queries, residual = parse_queries(queries, header.qd_count)
     records = list(parse_records(residual))
     return DNSPacket(header).set_data(queries, records)
+
+
+def create_dns_packet(request_id: int, queries: List[DNSQuery]) -> DNSPacket:
+    header = DNSHeader(request_id, False, 0, False, False, True, True,
+                       0, 1, 0, 0, 0)
+
+    return DNSPacket(header).set_data(queries, [])

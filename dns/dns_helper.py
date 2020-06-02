@@ -1,5 +1,12 @@
+import struct
+
 MASK = [1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16387,
         32767, 65535, 131071]
+
+TYPES = {'a': 1, 'ns': 2, 'md': 3, 'mf': 4, 'cname': 5, 'soa': 6, 'mb': 7,
+         'mg': 8, 'mr': 9, 'null': 10, 'wks': 11, 'ptr': 12, 'hinfo': 13,
+         'minfo': 14, 'ms': 15, 'txt': 16}
+CLASSES = {'in': 1, 'cs': 2, 'ch': 3, 'hs': 4}
 
 
 def bytes_at(data, pos, size):
@@ -26,4 +33,3 @@ def create_byte_qname(qname: str):
     fmt += 'c'
 
     return struct.pack(fmt, *collection), byte_length
-
