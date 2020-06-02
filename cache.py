@@ -1,24 +1,35 @@
 import datetime
+import time
+from threading import Lock
+from typing import Tuple
+
+from dns.resource_record import ResourceRecord
 
 
 class Cache:
     def __init__(self):
-        self.a_to_ab = {}
-        self.b_to_ab = {}
-        self.record_creation_time = {}
+        self.cache = {}  # dict[(qname, qtype,qclass): (rr, time received)]
+        self.lock = Lock()
 
-    def add_pair(self, a, b):
-        pair = (a, b)
-        time = datetime.datetime.now()
-        self.a_to_ab[a] = pair
-        self.b_to_ab[b] = pair
-        self.record_creation_time[pair] = time
+    def __getitem__(self, item) -> Tuple[ResourceRecord, float]:
+        with self.lock:
+            return self.cache[item]
 
-    def remove_records_older_than(self, timeout):
-        now = datetime.datetime.now()
-        pairs = filter(lambda k: (self.record_creation_time[k] - now) > timeout,
-                       self.record_creation_time.keys())
-        for pair in pairs:
-            del(self.record_creation_time[pair])
-            del(self.a_to_ab[pair[0]])
-            del(self.b_to_ab[pair[1]])
+    def __contains__(self, item):
+        with self.lock:
+            return item in self.cache
+
+    def append(self, key, item):
+        with self.lock:
+            if key in self.cache:
+                self.cache[key].append(item)
+            else:
+                self.cache[key] = [item]
+
+    def remove_expired(self):
+        now = time.time()
+        with self.lock:
+            for k in self.cache:
+                rr: Tuple[ResourceRecord, time] = self.cache[k]
+                if rr[0].ttl < (now - rr[1]):
+                    del (self.cache[k])
