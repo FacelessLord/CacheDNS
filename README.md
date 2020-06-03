@@ -18,7 +18,7 @@ Server started as python-executable file:
 python server_runner.py
 ```
 
-##Configuration
+## Configuration
 To configure server settings open `config.json` file and change value at `time_offset`:
 * `ns` section controls server Internet setting
 * `fwd` section describes parent dns-server
