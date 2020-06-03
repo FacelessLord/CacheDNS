@@ -2,7 +2,7 @@ import socket
 import time
 from typing import List, Tuple
 
-from cache import Cache
+from cache.cache import Cache
 from dns.dns_header import DNSHeader
 from dns.dns_packet import read_packet, DNSPacket
 from dns.resource_record import ResourceRecord
@@ -54,6 +54,7 @@ class NameServer:
                     self.cache.append(key, (rr, now))
 
                 server_socket.sendto(dns_response_bytes, address)
+                print('\tResponded to ' + str(address))
             else:
                 print('\tCache hit')
                 rrs_with_time: List[Tuple[ResourceRecord, float]] = []

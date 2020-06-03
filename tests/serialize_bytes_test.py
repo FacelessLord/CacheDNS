@@ -1,5 +1,5 @@
 from cache import Cache
-from cache_controller import deserialize_entry, serialize_entry, \
+from cache.cache_controller import deserialize_entry, serialize_entry, \
     deserialize_cache, serialize_cache
 from dns.resource_record import ResourceRecord
 

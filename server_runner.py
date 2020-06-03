@@ -1,7 +1,7 @@
 import signal
 import sys
 
-from cache_controller import CacheController
+from cache.cache_controller import CacheController
 from config import read_config
 from name_server import NameServer
 

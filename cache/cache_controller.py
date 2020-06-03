@@ -1,6 +1,6 @@
 import pickle
 
-from cache import Cache
+from cache.cache import Cache
 
 
 class CacheController:
