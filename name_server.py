@@ -28,12 +28,12 @@ class NameServer:
             request_bytes, address = server_socket.recvfrom(
                 config['buffersize'])
 
-            print('\tRequest from ' + str(address))
+            print('Request from ' + str(address))
             request_packet = read_packet(request_bytes)
 
             have_non_cached_quests = False
             for q in request_packet.queries:
-                if (q.qname, q.qtype) not in self.cache.cache:
+                if (q.qname, q.qtype) not in self.cache:
                     have_non_cached_quests = True
                     break
 

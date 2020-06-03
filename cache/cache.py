@@ -1,7 +1,7 @@
 import datetime
 import time
 from threading import Lock
-from typing import Tuple
+from typing import Tuple, List
 
 from dns.resource_record import ResourceRecord
 
@@ -30,6 +30,7 @@ class Cache:
         now = time.time()
         with self.lock:
             for k in self.cache:
-                rr: Tuple[ResourceRecord, time] = self.cache[k]
-                if rr[0].ttl < (now - rr[1]):
-                    del (self.cache[k])
+                rrl: List[Tuple[ResourceRecord, time]] = self.cache[k]
+                for rr in rrl:
+                    if rr[0].ttl < (now - rr[1]):
+                        rrl.remove(rr)

@@ -1,4 +1,6 @@
 import pickle
+import threading
+import time
 
 from cache.cache import Cache
 
@@ -11,6 +13,12 @@ class CacheController:
         if load_from_cache:
             print('Reading Cache from file')
             self.cache.cache = self.load_cache()
+            print('Cache loaded')
+
+        print('Loading Cache Daemon')
+        self.daemon = threading.Thread(target=cache_daemon, args=[self.cache])
+        self.daemon.setDaemon(True)
+        self.daemon.setName("Cache Daemon")
 
     def save_cache(self):
         file = open(self.filename, 'wb')
@@ -25,3 +33,9 @@ class CacheController:
             return new_cache
         except:
             return {}
+
+
+def cache_daemon(cache: Cache):
+    print('Daemon started')
+    while True:
+        time.sleep(10)

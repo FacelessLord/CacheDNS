@@ -22,7 +22,7 @@ if __name__ == "__main__":
     config = read_config()
     print('Loading Cache controller')
     controller = CacheController(True, config)  # True for load cache
-
+    controller.daemon.start()
     signal.signal(signal.SIGINT, cache_saver(controller))
 
     print('Loading Name server')
