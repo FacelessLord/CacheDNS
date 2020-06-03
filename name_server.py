@@ -33,7 +33,7 @@ class NameServer:
 
             have_non_cached_quests = False
             for q in request_packet.queries:
-                if (q.qname, q.qtype, q.qclass) not in self.cache.cache:
+                if (q.qname, q.qtype) not in self.cache.cache:
                     have_non_cached_quests = True
                     break
 
@@ -42,6 +42,7 @@ class NameServer:
                 client_socket.sendto(request_bytes, fwd_address)
                 dns_response_bytes, _ = client_socket.recvfrom(
                     config['buffersize'])
+                print('\tReceived')
                 dns_response = read_packet(dns_response_bytes)
 
                 now = time.time()
@@ -49,7 +50,7 @@ class NameServer:
                 for rr in dns_response.ans_records + \
                           dns_response.auth_records + \
                           dns_response.additional_records:
-                    key = (rr.name, rr.rtype, rr.rclass)
+                    key = (rr.name, rr.rtype)
                     self.cache.append(key, (rr, now))
 
                 server_socket.sendto(dns_response_bytes, address)
@@ -57,14 +58,16 @@ class NameServer:
                 print('\tCache hit')
                 rrs_with_time: List[Tuple[ResourceRecord, float]] = []
                 for q in request_packet.queries:
-                    key = (q.qname, q.qtype, q.qclass)
+                    key = (q.qname, q.qtype)
                     rrs_with_time += self.cache[key]
 
                 rrs: List[ResourceRecord] = list(
                     map(lambda p: p[0], rrs_with_time))
                 header = DNSHeader(request_packet.header.identifier, True,
-                                   ns_count=len(rrs))
+                                   qd_count=len(request_packet.queries),
+                                   an_count=len(rrs))
                 response = DNSPacket(header)
-                response.set_data([], rrs)
+                response.set_data(request_packet.queries, rrs)
 
                 server_socket.sendto(response.to_bytes(), address)
+                print('\tResponded to ' + str(address))

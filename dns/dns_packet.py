@@ -36,6 +36,10 @@ class DNSPacket:
             query_bytes, size = q.to_bytes()
             fmt += str(size) + 's'
             values.append(query_bytes)
+        for r in self.ans_records + self.auth_records + self.additional_records:
+            record_bytes = r.to_bytes()
+            fmt += str(len(record_bytes)) + 's'
+            values.append(record_bytes)
 
         return struct.pack(fmt, *values)
 
@@ -45,8 +49,8 @@ def read_packet(packet_bytes: bytes) -> DNSPacket:
         '!12s' + str(len(packet_bytes) - 12) + 's',
         packet_bytes)
     header = parse_header(header)
-    queries, residual = parse_queries(queries, header.qd_count)
-    records = list(parse_records(residual))
+    queries, residual = parse_queries(queries, header.qd_count, packet_bytes)
+    records = list(parse_records(residual, packet_bytes))
     return DNSPacket(header).set_data(queries, records)
 
 

@@ -1,5 +1,6 @@
 import struct
 from dns import dns_helper
+from dns.dns_header import DNSHeader
 
 
 def test_qname_marshaling_easy():

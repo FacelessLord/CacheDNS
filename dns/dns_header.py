@@ -28,7 +28,6 @@ class DNSHeader:
                     self.aa << 10 | self.tc << 9 | self.rd << 8 |
                     self.ra << 7 | (self.rcode & 0b1111))
 
-        print(qr_rcode)
         return struct.pack('!hH4h', self.identifier, qr_rcode,
                            self.qd_count, self.an_count,
                            self.ns_count, self.ar_count)

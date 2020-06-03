@@ -21,9 +21,15 @@ class ResourceRecord:
             '!' + str(size) + 's2hIH' + str(self.rd_length) + 's',
             name, self.rtype, self.rclass, self.ttl, self.rd_length, self.rdata)
 
+    def __eq__(self, other):
+        return self.name == other.name and self.rtype == other.rtype and \
+               self.rclass == other.rclass and self.ttl == other.ttl and \
+               self.rd_length == other.rd_length and self.rdata == other.rdata
 
-def from_bytes(record_bytes: bytes) -> Tuple[ResourceRecord, bytes]:
-    domain, residual = read_domain(record_bytes)
+
+def from_bytes(record_bytes: bytes, body: bytes) -> \
+        Tuple[ResourceRecord, bytes]:
+    domain, residual = read_domain(record_bytes, body)
     # 10 is 2*2+4+2
     rtype, rclass, ttl, rdlength, data = \
         struct.unpack('!2hIH' + str(len(residual) - 10) + 's', residual)
@@ -35,7 +41,7 @@ def from_bytes(record_bytes: bytes) -> Tuple[ResourceRecord, bytes]:
     return record, next_record
 
 
-def parse_records(records: bytes) -> Iterable[ResourceRecord]:
+def parse_records(records: bytes, body: bytes) -> Iterable[ResourceRecord]:
     while len(records) > 0:
-        record, records = from_bytes(records)
+        record, records = from_bytes(records, body)
         yield record
